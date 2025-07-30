@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscrybe - Track Your Subscriptions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/plugin/relativeTime.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- App Container -->
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <!-- Header -->
+        <header class="bg-white shadow-md">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="text-2xl font-bold text-gray-800">
+                    <span class="text-indigo-600">Sub</span>scrybe
+                </div>
+                <div id="auth-links">
+                    <button id="logout-btn" class="hidden bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300">Logout</button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto p-4 md:p-6">
+
+            <!-- Auth Section -->
+            <div id="auth-section" class="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Manage Your Subscriptions</h2>
+                <p class="text-center text-gray-500 mb-8">Sign up or log in to continue.</p>
+                <div class="space-y-4">
+                     <div>
+                        <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="email" placeholder="you@example.com" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div>
+                        <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="password" placeholder="••••••••" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="login-btn" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition duration-300">Login</button>
+                        <button id="signup-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Sign Up</button>
+                    </div>
+                </div>
+                 <div class="mt-4 text-center text-xs text-gray-500">
+                    Your User ID: <span id="user-id-display-auth" class="font-mono"></span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section (Hidden by default) -->
+            <div id="dashboard-section" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-3xl font-bold">Dashboard</h1>
+                        <p class="text-gray-500">Your active subscriptions and trials.</p>
+                         <div class="mt-2 text-xs text-gray-500">
+                            User ID: <span id="user-id-display-dashboard" class="font-mono bg-gray-100 p-1 rounded"></span>
+                        </div>
+                    </div>
+                    <button id="add-sub-btn" class="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                        <span>Add Subscription</span>
+                    </button>
+                </div>
+
+                <!-- Notifications -->
+                <div id="notification-area" class="mb-6 space-y-3"></div>
+
+                <!-- Subscription List -->
+                <div id="subscription-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Subscription cards will be injected here -->
+                </div>
+                 <div id="empty-state" class="hidden text-center py-16 border-2 border-dashed border-gray-300 rounded-xl mt-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No subscriptions yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">Get started by adding a new subscription.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white mt-12 py-4">
+            <div class="container mx-auto px-6 text-center text-gray-500 text-sm">
+                &copy; 2025 Subscrybe. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <!-- Add/Edit Subscription Modal -->
+    <div id="subscription-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg m-4">
+            <h2 id="modal-title" class="text-2xl font-bold mb-6">Add New Subscription</h2>
+            <form id="subscription-form">
+                <input type="hidden" id="subscription-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="sub-name" class="block text-sm font-medium text-gray-700">Service Name</label>
+                        <input type="text" id="sub-name" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Netflix, Spotify" required>
+                    </div>
+                    <div>
+                        <label for="sub-price" class="block text-sm font-medium text-gray-700">Monthly Cost ($)</label>
+                        <input type="number" id="sub-price" step="0.01" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 9.99" required>
+                    </div>
+                     <div>
+                        <label for="sub-trial-end" class="block text-sm font-medium text-gray-700">Trial End Date (Optional)</label>
+                        <input type="date" id="sub-trial-end" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="sub-cancel-url" class="block text-sm font-medium text-gray-700">Cancellation Page URL (Optional)</label>
+                        <input type="url" id="sub-cancel-url" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="https://netflix.com/cancel">
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-4">
+                    <button type="button" id="cancel-modal-btn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Save Subscription</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- CONFIGURATION ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyD_uwuVci261S9fjoXfVgsCWJ5_HiEYPMg",
+          authDomain: "my-campaign-2059f.firebaseapp.com",
+          databaseURL: "https://my-campaign-2059f-default-rtdb.firebaseio.com",
+          projectId: "my-campaign-2059f",
+          storageBucket: "my-campaign-2059f.appspot.com",
+          messagingSenderId: "819468945870",
+          appId: "1:819468945870:web:c800cad8be17799583039f",
+          measurementId: "G-75P88YHNXL"
+        };
+        
+        // --- FIREBASE INITIALIZATION ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userId = null;
+        let userProfile = {};
+        let subscriptionsUnsubscribe = null;
+
+        // --- UI ELEMENTS ---
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loginBtn = document.getElementById('login-btn');
+        const signupBtn = document.getElementById('signup-btn');
+        const addSubBtn = document.getElementById('add-sub-btn');
+        const subscriptionModal = document.getElementById('subscription-modal');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+        const subscriptionForm = document.getElementById('subscription-form');
+        const subscriptionList = document.getElementById('subscription-list');
+        const emptyState = document.getElementById('empty-state');
+        const notificationArea = document.getElementById('notification-area');
+        const userIdDisplayAuth = document.getElementById('user-id-display-auth');
+        const userIdDisplayDashboard = document.getElementById('user-id-display-dashboard');
+
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                userId = user.uid;
+                await fetchUserProfile();
+                authSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                userIdDisplayDashboard.textContent = userId;
+                await fetchSubscriptions();
+            } else {
+                currentUser = null;
+                userId = crypto.randomUUID(); // For display before login
+                userProfile = {};
+                authSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                userIdDisplayAuth.textContent = userId;
+                if (subscriptionsUnsubscribe) {
+                    subscriptionsUnsubscribe();
+                }
+                subscriptionList.innerHTML = '';
+            }
+        });
+        
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                // Using a custom modal/alert would be better than window.alert
+                alert("Please enter email and password.");
+                return;
+            }
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Login failed:", error);
+                alert(error.message);
+            }
+        });
+
+        signupBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                alert("Please enter email and password.");
+                return;
+            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                // Save user profile without phone number
+                const userDocRef = doc(db, `users/${user.uid}/profile`, 'info');
+                await setDoc(userDocRef, { email: email });
+
+            } catch (error) {
+                console.error("Signup failed:", error);
+                alert(error.message);
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Logout failed:", error);
+            }
+        });
+
+        // --- FIRESTORE & DATA ---
+        
+        const fetchUserProfile = async () => {
+            if (!userId) return;
+            const userDocRef = doc(db, `users/${userId}/profile`, 'info');
+            const docSnap = await getDoc(userDocRef);
+            if (docSnap.exists()) {
+                userProfile = docSnap.data();
+            } else {
+                console.log("No user profile found.");
+                userProfile = {};
+            }
+        };
+
+        const getSubscriptionsCollection = () => {
+            if (!userId) throw new Error("User not authenticated");
+            return collection(db, `users/${userId}/subscriptions`);
+        };
+
+        const fetchSubscriptions = async () => {
+            if (!currentUser) return;
+            const subsCollection = getSubscriptionsCollection();
+            
+            if (subscriptionsUnsubscribe) {
+                subscriptionsUnsubscribe();
+            }
+
+            subscriptionsUnsubscribe = onSnapshot(subsCollection, (snapshot) => {
+                const subs = [];
+                snapshot.forEach(doc => {
+                    subs.push({ id: doc.id, ...doc.data() });
+                });
+                renderSubscriptions(subs);
+                checkTrialExpirations(subs);
+            });
+        };
+
+        const renderSubscriptions = (subs) => {
+            subscriptionList.innerHTML = '';
+            if (subs.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                subs.forEach(sub => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white rounded-xl shadow-md p-5 flex flex-col justify-between transition transform hover:-translate-y-1';
+                    
+                    const trialEndDate = sub.trialEndDate ? dayjs(sub.trialEndDate) : null;
+                    const isTrial = trialEndDate && trialEndDate.isAfter(dayjs());
+                    const daysLeft = trialEndDate ? trialEndDate.diff(dayjs(), 'day') : 0;
+
+                    let trialInfo = '';
+                    if (isTrial) {
+                        trialInfo = `<div class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 inline-block">Trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}</div>`;
+                    }
+
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <h3 class="text-xl font-bold text-gray-800">${sub.name}</h3>
+                                <div class="text-2xl font-bold text-indigo-600">$${parseFloat(sub.price).toFixed(2)}</div>
+                            </div>
+                            <p class="text-gray-500 text-sm mb-3">per month</p>
+                            ${trialInfo}
+                        </div>
+                        <div class="mt-4 flex justify-end space-x-3">
+                           ${sub.cancelUrl ? `<a href="${sub.cancelUrl}" target="_blank" class="text-sm text-indigo-600 hover:underline">Cancel Link</a>` : ''}
+                            <button data-id="${sub.id}" class="delete-btn text-sm text-red-500 hover:underline">Delete</button>
+                        </div>
+                    `;
+                    subscriptionList.appendChild(card);
+                });
+            }
+        };
+        
+        const checkTrialExpirations = (subs) => {
+            notificationArea.innerHTML = '';
+            dayjs.extend(window.dayjs_plugin_relativeTime);
+
+            subs.forEach(sub => {
+                if (sub.trialEndDate) {
+                    const endDate = dayjs(sub.trialEndDate);
+                    const now = dayjs();
+                    const daysDiff = endDate.diff(now, 'day');
+
+                    if (daysDiff >= 0 && daysDiff <= 2) {
+                        const notification = document.createElement('div');
+                        notification.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow';
+                        notification.innerHTML = `
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between">
+                                <div>
+                                    <p class="font-bold">Alert: '${sub.name}' trial is ending soon!</p>
+                                    <p class="text-sm">It expires ${endDate.fromNow()}.</p>
+                                </div>
+                                <div class="mt-3 sm:mt-0 flex space-x-3">
+                                    ${sub.cancelUrl ? `<a href="${sub.cancelUrl}" target="_blank" class="px-3 py-1.5 border border-yellow-600 rounded-md text-sm font-medium text-yellow-700 hover:bg-yellow-200 transition">Cancel Page</a>` : ''}
+                                </div>
+                            </div>
+                        `;
+                        notificationArea.appendChild(notification);
+                    }
+                }
+            });
+        };
+
+        subscriptionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) {
+                alert("You must be logged in to add a subscription.");
+                return;
+            }
+
+            const subData = {
+                name: document.getElementById('sub-name').value,
+                price: document.getElementById('sub-price').value,
+                trialEndDate: document.getElementById('sub-trial-end').value,
+                cancelUrl: document.getElementById('sub-cancel-url').value,
+            };
+
+            try {
+                const subsCollection = getSubscriptionsCollection();
+                await addDoc(subsCollection, subData);
+                closeModal();
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Failed to add subscription.");
+            }
+        });
+        
+        subscriptionList.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const subId = e.target.dataset.id;
+                if (confirm('Are you sure you want to delete this subscription?')) {
+                    try {
+                        const subDocRef = doc(db, `users/${userId}/subscriptions`, subId);
+                        await deleteDoc(subDocRef);
+                    } catch (error) {
+                        console.error("Error deleting document: ", error);
+                        alert("Failed to delete subscription.");
+                    }
+                }
+            }
+        });
+
+
+        // --- MODAL CONTROLS ---
+        const openModal = () => {
+            subscriptionForm.reset();
+            document.getElementById('subscription-id').value = '';
+            subscriptionModal.classList.remove('hidden');
+        };
+
+        const closeModal = () => {
+            subscriptionModal.classList.add('hidden');
+        };
+
+        addSubBtn.addEventListener('click', openModal);
+        cancelModalBtn.addEventListener('click', closeModal);
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+    </script>
+</body>
+</html>
