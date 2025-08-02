@@ -3,415 +3,575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SubsAnalytics - Track Your Subscriptions</title>
+    <title>PIMR Workspace MVP</title>
+    
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/dayjs.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.11.10/plugin/relativeTime.js"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
+        /* Use the Inter font family */
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom scrollbar for a more modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+        /* Simple animation for content fade-in */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-slate-50">
 
     <!-- App Container -->
-    <div id="app" class="min-h-screen flex flex-col">
+    <div id="app" class="min-h-screen">
 
         <!-- Header -->
-        <header class="bg-white shadow-md">
-            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <div class="text-2xl font-bold text-gray-800">
-                    <span class="text-indigo-600">Subs</span>Analytics
+        <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40 border-b border-slate-200">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-3">
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-3">
+                        <svg class="h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18h18a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0121.75 21H2.25A2.25 2.25 0 010 18.75V4.5A2.25 2.25 0 012.25 3z" />
+                        </svg>
+                        <h1 class="text-xl font-bold text-slate-800 tracking-tight">PIMR Workspace</h1>
+                    </div>
+                    <!-- Navigation -->
+                    <nav id="nav-links" class="flex space-x-1 sm:space-x-2 bg-slate-100 p-1 rounded-full">
+                        <!-- Nav links will be injected here by JavaScript -->
+                    </nav>
                 </div>
-                <div id="auth-links">
-                    <button id="logout-btn" class="hidden bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 transition duration-300">Logout</button>
-                </div>
-            </nav>
+            </div>
         </header>
 
         <!-- Main Content -->
-        <main class="flex-grow container mx-auto p-4 md:p-6">
-
-            <!-- Auth Section -->
-            <div id="auth-section" class="max-w-md mx-auto mt-10 p-8 bg-white rounded-xl shadow-lg">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Manage Your Subscriptions</h2>
-                <p class="text-center text-gray-500 mb-8">Sign up or log in to continue.</p>
-                <div class="space-y-4">
-                     <div>
-                        <label for="email" class="text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="email" placeholder="you@example.com" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
-                    </div>
-                    <div>
-                        <label for="password" class="text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" id="password" placeholder="••••••••" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button id="login-btn" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition duration-300">Login</button>
-                        <button id="signup-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105">Sign Up</button>
-                    </div>
-                </div>
-                 <div class="mt-4 text-center text-xs text-gray-500">
-                    Your User ID: <span id="user-id-display-auth" class="font-mono"></span>
-                </div>
-            </div>
-
-            <!-- Dashboard Section (Hidden by default) -->
-            <div id="dashboard-section" class="hidden">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 class="text-3xl font-bold">Dashboard</h1>
-                        <p class="text-gray-500">Your active subscriptions and trials.</p>
-                         <div class="mt-2 text-xs text-gray-500">
-                            User ID: <span id="user-id-display-dashboard" class="font-mono bg-gray-100 p-1 rounded"></span>
-                        </div>
-                    </div>
-                    <button id="add-sub-btn" class="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-                        <span>Add Subscription</span>
-                    </button>
-                </div>
-
-                <!-- Notifications -->
-                <div id="notification-area" class="mb-6 space-y-3"></div>
-
-                <!-- Subscription List -->
-                <div id="subscription-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Subscription cards will be injected here -->
-                </div>
-                 <div id="empty-state" class="hidden text-center py-16 border-2 border-dashed border-gray-300 rounded-xl mt-8">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No subscriptions yet</h3>
-                    <p class="mt-1 text-sm text-gray-500">Get started by adding a new subscription.</p>
-                </div>
-            </div>
+        <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+            <!-- Content sections will be injected here by JavaScript -->
         </main>
 
-        <!-- Footer -->
-        <footer class="bg-white mt-12 py-4">
-            <div class="container mx-auto px-6 text-center text-gray-500 text-sm">
-                &copy; 2025 SubsAnalytics. All rights reserved.
+        <!-- Modal -->
+        <div id="modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 flex justify-center items-center p-4 hidden">
+            <div id="modal-content" class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md m-4 transform transition-all scale-95 opacity-0">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 id="modal-title" class="text-xl font-bold text-slate-800"></h3>
+                    <button id="modal-close-btn" class="text-slate-400 hover:text-slate-800 transition-colors">&times;</button>
+                </div>
+                <div id="modal-body" class="text-slate-600"></div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-200 text-slate-800 rounded-lg hover:bg-slate-300 font-semibold text-sm">Cancel</button>
+                    <button id="modal-confirm-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold text-sm">Confirm</button>
+                </div>
             </div>
-        </footer>
-    </div>
-
-    <!-- Add/Edit Subscription Modal -->
-    <div id="subscription-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-lg m-4">
-            <h2 id="modal-title" class="text-2xl font-bold mb-6">Add New Subscription</h2>
-            <form id="subscription-form">
-                <input type="hidden" id="subscription-id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="sub-name" class="block text-sm font-medium text-gray-700">Service Name</label>
-                        <input type="text" id="sub-name" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Netflix, Spotify" required>
-                    </div>
-                    <div>
-                        <label for="sub-price" class="block text-sm font-medium text-gray-700">Monthly Cost ($)</label>
-                        <input type="number" id="sub-price" step="0.01" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 9.99" required>
-                    </div>
-                     <div>
-                        <label for="sub-trial-end" class="block text-sm font-medium text-gray-700">Trial End Date (Optional)</label>
-                        <input type="date" id="sub-trial-end" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label for="sub-cancel-url" class="block text-sm font-medium text-gray-700">Cancellation Page URL (Optional)</label>
-                        <input type="url" id="sub-cancel-url" class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="https://netflix.com/cancel">
-                    </div>
-                </div>
-                <div class="mt-8 flex justify-end space-x-4">
-                    <button type="button" id="cancel-modal-btn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">Cancel</button>
-                    <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">Save Subscription</button>
-                </div>
-            </form>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Firebase Imports
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- CONFIGURATION ---
-        const firebaseConfig = {
-          apiKey: "AIzaSyD_uwuVci261S9fjoXfVgsCWJ5_HiEYPMg",
-          authDomain: "my-campaign-2059f.firebaseapp.com",
-          databaseURL: "https://my-campaign-2059f-default-rtdb.firebaseio.com",
-          projectId: "my-campaign-2059f",
-          storageBucket: "my-campaign-2059f.appspot.com",
-          messagingSenderId: "819468945870",
-          appId: "1:819468945870:web:c800cad8be17799583039f",
-          measurementId: "G-75P88YHNXL"
-        };
-        
-        // --- FIREBASE INITIALIZATION ---
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let userId = null;
-        let userProfile = {};
-        let subscriptionsUnsubscribe = null;
-
-        // --- UI ELEMENTS ---
-        const authSection = document.getElementById('auth-section');
-        const dashboardSection = document.getElementById('dashboard-section');
-        const logoutBtn = document.getElementById('logout-btn');
-        const loginBtn = document.getElementById('login-btn');
-        const signupBtn = document.getElementById('signup-btn');
-        const addSubBtn = document.getElementById('add-sub-btn');
-        const subscriptionModal = document.getElementById('subscription-modal');
-        const cancelModalBtn = document.getElementById('cancel-modal-btn');
-        const subscriptionForm = document.getElementById('subscription-form');
-        const subscriptionList = document.getElementById('subscription-list');
-        const emptyState = document.getElementById('empty-state');
-        const notificationArea = document.getElementById('notification-area');
-        const userIdDisplayAuth = document.getElementById('user-id-display-auth');
-        const userIdDisplayDashboard = document.getElementById('user-id-display-dashboard');
-
-        // --- AUTHENTICATION ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                userId = user.uid;
-                await fetchUserProfile();
-                authSection.classList.add('hidden');
-                dashboardSection.classList.remove('hidden');
-                logoutBtn.classList.remove('hidden');
-                userIdDisplayDashboard.textContent = userId;
-                await fetchSubscriptions();
-            } else {
-                currentUser = null;
-                userId = crypto.randomUUID(); // For display before login
-                userProfile = {};
-                authSection.classList.remove('hidden');
-                dashboardSection.classList.add('hidden');
-                logoutBtn.classList.add('hidden');
-                userIdDisplayAuth.textContent = userId;
-                if (subscriptionsUnsubscribe) {
-                    subscriptionsUnsubscribe();
-                }
-                subscriptionList.innerHTML = '';
-            }
-        });
-        
-        loginBtn.addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (!email || !password) {
-                // Using a custom modal/alert would be better than window.alert
-                alert("Please enter email and password.");
-                return;
-            }
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch (error) {
-                console.error("Login failed:", error);
-                alert(error.message);
-            }
-        });
-
-        signupBtn.addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            if (!email || !password) {
-                alert("Please enter email and password.");
-                return;
-            }
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                // Save user profile without phone number
-                const userDocRef = doc(db, `users/${user.uid}/profile`, 'info');
-                await setDoc(userDocRef, { email: email });
-
-            } catch (error) {
-                console.error("Signup failed:", error);
-                alert(error.message);
-            }
-        });
-
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-            } catch (error) {
-                console.error("Logout failed:", error);
-            }
-        });
-
-        // --- FIRESTORE & DATA ---
-        
-        const fetchUserProfile = async () => {
-            if (!userId) return;
-            const userDocRef = doc(db, `users/${userId}/profile`, 'info');
-            const docSnap = await getDoc(userDocRef);
-            if (docSnap.exists()) {
-                userProfile = docSnap.data();
-            } else {
-                console.log("No user profile found.");
-                userProfile = {};
-            }
-        };
-
-        const getSubscriptionsCollection = () => {
-            if (!userId) throw new Error("User not authenticated");
-            return collection(db, `users/${userId}/subscriptions`);
-        };
-
-        const fetchSubscriptions = async () => {
-            if (!currentUser) return;
-            const subsCollection = getSubscriptionsCollection();
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
             
-            if (subscriptionsUnsubscribe) {
-                subscriptionsUnsubscribe();
-            }
-
-            subscriptionsUnsubscribe = onSnapshot(subsCollection, (snapshot) => {
-                const subs = [];
-                snapshot.forEach(doc => {
-                    subs.push({ id: doc.id, ...doc.data() });
-                });
-                renderSubscriptions(subs);
-                checkTrialExpirations(subs);
-            });
-        };
-
-        const renderSubscriptions = (subs) => {
-            subscriptionList.innerHTML = '';
-            if (subs.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                subs.forEach(sub => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-xl shadow-md p-5 flex flex-col justify-between transition transform hover:-translate-y-1';
-                    
-                    const trialEndDate = sub.trialEndDate ? dayjs(sub.trialEndDate) : null;
-                    const isTrial = trialEndDate && trialEndDate.isAfter(dayjs());
-                    const daysLeft = trialEndDate ? trialEndDate.diff(dayjs(), 'day') : 0;
-
-                    let trialInfo = '';
-                    if (isTrial) {
-                        trialInfo = `<div class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 inline-block">Trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}</div>`;
-                    }
-
-                    card.innerHTML = `
-                        <div>
-                            <div class="flex justify-between items-start">
-                                <h3 class="text-xl font-bold text-gray-800">${sub.name}</h3>
-                                <div class="text-2xl font-bold text-indigo-600">$${parseFloat(sub.price).toFixed(2)}</div>
-                            </div>
-                            <p class="text-gray-500 text-sm mb-3">per month</p>
-                            ${trialInfo}
-                        </div>
-                        <div class="mt-4 flex justify-end space-x-3">
-                           ${sub.cancelUrl ? `<a href="${sub.cancelUrl}" target="_blank" class="text-sm text-indigo-600 hover:underline">Cancel Link</a>` : ''}
-                            <button data-id="${sub.id}" class="delete-btn text-sm text-red-500 hover:underline">Delete</button>
-                        </div>
-                    `;
-                    subscriptionList.appendChild(card);
-                });
-            }
-        };
-        
-        const checkTrialExpirations = (subs) => {
-            notificationArea.innerHTML = '';
-            dayjs.extend(window.dayjs_plugin_relativeTime);
-
-            subs.forEach(sub => {
-                if (sub.trialEndDate) {
-                    const endDate = dayjs(sub.trialEndDate);
-                    const now = dayjs();
-                    const daysDiff = endDate.diff(now, 'day');
-
-                    if (daysDiff >= 0 && daysDiff <= 2) {
-                        const emailSubject = `Subscription Reminder: '${sub.name}' Trial Ending Soon`;
-                        const emailBody = `Hi,\n\nThis is a friendly reminder that your trial for '${sub.name}' is ending on ${endDate.format('MMMM D, YYYY')}.\n\nIf you don't wish to continue with a paid subscription, you can use the cancellation link below:\n${sub.cancelUrl || 'No cancellation link provided.'}\n\nThanks,\nSubsAnalytics`;
-                        const emailLink = `mailto:${userProfile.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-
-                        const notification = document.createElement('div');
-                        notification.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-lg shadow';
-                        notification.innerHTML = `
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between">
-                                <div>
-                                    <p class="font-bold">Alert: '${sub.name}' trial is ending soon!</p>
-                                    <p class="text-sm">It expires ${endDate.fromNow()}.</p>
-                                </div>
-                                <div class="mt-3 sm:mt-0 flex flex-wrap gap-2">
-                                    ${sub.cancelUrl ? `<a href="${sub.cancelUrl}" target="_blank" class="px-3 py-1.5 border border-yellow-600 rounded-md text-sm font-medium text-yellow-700 hover:bg-yellow-200 transition">Cancel Page</a>` : ''}
-                                    <a href="${emailLink}" class="px-3 py-1.5 bg-blue-500 rounded-md text-sm font-medium text-white hover:bg-blue-600 transition">Send Email Reminder</a>
-                                </div>
-                            </div>
-                        `;
-                        notificationArea.appendChild(notification);
-                    }
-                }
-            });
-        };
-
-        subscriptionForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser) {
-                alert("You must be logged in to add a subscription.");
-                return;
-            }
-
-            const subData = {
-                name: document.getElementById('sub-name').value,
-                price: document.getElementById('sub-price').value,
-                trialEndDate: document.getElementById('sub-trial-end').value,
-                cancelUrl: document.getElementById('sub-cancel-url').value,
+            // --- MOCK DATA ---
+            const mockData = {
+                users: [
+                    { id: 1, type: 'Alumni', name: 'Aditi Sharma', batch: 2018, specialization: 'Marketing', company: 'Google', title: 'Product Marketing Manager', location: 'Bengaluru', isMentor: true, profilePic: 'https://placehold.co/100x100/EED7D7/3D2C2C?text=AS', linkedin: '#' },
+                    { id: 2, type: 'Alumni', name: 'Rohan Verma', batch: 2016, specialization: 'Finance', company: 'Goldman Sachs', title: 'Investment Banking Analyst', location: 'Mumbai', isMentor: true, profilePic: 'https://placehold.co/100x100/D7EED7/2C3D2C?text=RV', linkedin: '#' },
+                    { id: 3, type: 'Student', name: 'Priya Mehta', batch: 2025, specialization: 'HR', company: 'N/A', title: 'Student', location: 'Indore', isMentor: false, profilePic: 'https://placehold.co/100x100/D7D7EE/2C2C3D?text=PM', linkedin: '#' },
+                    { id: 4, type: 'Alumni', name: 'Vikram Singh', batch: 2020, specialization: 'IT', company: 'Microsoft', title: 'Software Engineer', location: 'Hyderabad', isMentor: false, profilePic: 'https://placehold.co/100x100/EEDDD7/3D322C?text=VS', linkedin: '#' },
+                    { id: 5, type: 'Alumni', name: 'Anjali Rao', batch: 2019, specialization: 'Entrepreneurship', company: 'InnovateHub', title: 'Founder & CEO', location: 'Pune', isMentor: true, profilePic: 'https://placehold.co/100x100/D7EEE7/2C3D37?text=AR', linkedin: '#' },
+                    { id: 6, type: 'Student', name: 'Arjun Nair', batch: 2026, specialization: 'Marketing', company: 'N/A', title: 'Student', location: 'Indore', isMentor: false, profilePic: 'https://placehold.co/100x100/EEEED7/3D3D2C?text=AN', linkedin: '#' },
+                    { id: 7, type: 'Alumni', name: 'Neha Gupta', batch: 2017, specialization: 'Finance', company: 'J.P. Morgan', title: 'Senior Financial Analyst', location: 'Mumbai', isMentor: true, profilePic: 'https://placehold.co/100x100/E7D7EE/372C3D?text=NG', linkedin: '#' },
+                ],
+                groups: [
+                    { id: 1, name: 'Batch of 2025', type: 'Batch', members: 120 }, { id: 2, name: 'Batch of 2026', type: 'Batch', members: 115 }, { id: 3, name: 'Finance Club', type: 'Specialization', members: 85 }, { id: 4, name: 'Marketing Mavericks', type: 'Specialization', members: 92 }, { id: 5, name: 'HR Hub', type: 'Specialization', members: 68 }, { id: 6, name: 'E-Cell (Entrepreneurship)', type: 'Specialization', members: 75 }, { id: 7, name: 'PlaceComm', type: 'Committee', members: 20 },
+                ],
+                discussions: [
+                    { id: 1, author: 'Priya Mehta', anonymous: false, question: 'Facing a tough case study on market entry strategy for a D2C brand. Any frameworks you guys recommend?', replies: 3, upvotes: 15 }, { id: 2, author: 'Anonymous', anonymous: true, question: 'How do you handle interview anxiety, especially for final round placements? Any tips would be greatly appreciated.', replies: 5, upvotes: 28 }, { id: 3, author: 'Arjun Nair', anonymous: false, question: 'What are some must-have skills for a marketing internship in 2025?', replies: 2, upvotes: 18 },
+                ],
+                jobs: [
+                    { id: 1, title: 'Marketing Intern', company: 'Hindustan Unilever', location: 'Mumbai', type: 'Internship', postedBy: 'Aditi Sharma' }, { id: 2, title: 'Financial Analyst', company: 'J.P. Morgan', location: 'Bengaluru', type: 'Full-time', postedBy: 'Neha Gupta' }, { id: 3, title: 'Summer Intern - HR', company: 'Reliance Industries', location: 'Mumbai', type: 'Internship', postedBy: 'Alumni Relations' }, { id: 4, title: 'Tech Consultant', company: 'Infosys', location: 'Pune', type: 'Full-time', postedBy: 'Alumni Relations' },
+                ],
+                projects: [
+                    { id: 1, title: 'Need a finance major to build a valuation model for a startup idea.', postedBy: 'Anjali Rao' }, { id: 2, title: 'Looking for a collaborator for a research paper on AI in marketing.', postedBy: 'Arjun Nair' },
+                ],
+                events: [
+                    { id: 1, title: 'Alumni Meet & Greet 2025', date: '2025-09-15', type: 'Alumni' }, { id: 2, title: 'Guest Lecture: Future of Fintech', date: '2025-08-20', type: 'Academic' }, { id: 3, title: 'Marketing Club: Case Competition', date: '2025-08-25', type: 'Club' },
+                ],
             };
 
-            try {
-                const subsCollection = getSubscriptionsCollection();
-                await addDoc(subsCollection, subData);
-                closeModal();
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("Failed to add subscription.");
+            // --- ICONS ---
+            const icons = {
+                home: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" /><path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" /></svg>`,
+                directory: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63l-1.32.735a.75.75 0 01-.732 0l-1.32-.735a.75.75 0 01-.363-.63V19.125zM15.75 19.125a5.625 5.625 0 0111.25 0v.003l-.001.119a.75.75 0 01-.363.63l-1.32.735a.75.75 0 01-.732 0l-1.32-.735a.75.75 0 01-.363-.63V19.125z" /></svg>`,
+                community: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.15l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.15 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clip-rule="evenodd" /></svg>`,
+                discussions: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M5.337 21.714a.75.75 0 01-.82-1.036l.94-2.121a2.25 2.25 0 00-.214-2.423l-1.732-2.106a.75.75 0 01.54-1.223h2.47a2.25 2.25 0 002.121-.94l1.036-1.82a.75.75 0 011.329 0l1.036 1.82a2.25 2.25 0 002.121.94h2.47a.75.75 0 01.54 1.223l-1.732 2.106a2.25 2.25 0 00-.214 2.423l.94 2.121a.75.75 0 01-.82 1.036l-1.82-1.035a2.25 2.25 0 00-2.423.214l-2.106 1.732a.75.75 0 01-1.223-.54v-2.47a2.25 2.25 0 00-.94-2.121l-1.82-1.036a.75.75 0 010-1.329l1.82-1.036a2.25 2.25 0 00.94-2.121v-2.47a.75.75 0 011.223-.54l2.106 1.732a2.25 2.25 0 002.423.214l1.82 1.035a.75.75 0 01.82 1.036l-.94 2.121a2.25 2.25 0 00.214 2.423l1.732 2.106a.75.75 0 01-.54 1.223h-2.47a2.25 2.25 0 00-2.121.94l-1.036 1.82a.75.75 0 01-1.329 0l-1.036-1.82a2.25 2.25 0 00-2.121-.94h-2.47a.75.75 0 01-.54-1.223l1.732-2.106a2.25 2.25 0 00.214-2.423l-.94-2.121a.75.75 0 01.82-1.036l1.82 1.035a2.25 2.25 0 002.423-.214l2.106-1.732a.75.75 0 011.223.54v2.47a2.25 2.25 0 00.94 2.121l1.82 1.036a.75.75 0 010 1.329l-1.82 1.036a2.25 2.25 0 00-.94 2.121v2.47a.75.75 0 01-1.223.54l-2.106-1.732a2.25 2.25 0 00-2.423-.214l-1.82-1.035z" clip-rule="evenodd" /></svg>`,
+                careers: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.5a.75.75 0 00.5.707A9.735 9.735 0 006 21a9.707 9.707 0 005.25-1.533.75.75 0 000-1.334v-3a.75.75 0 00-.75-.75h-1.5a.75.75 0 00-.75.75v3a.75.75 0 00.75.75h.75a8.25 8.25 0 01-6-3.418V6.918A8.25 8.25 0 0112 3.5a.75.75 0 000-1.5H6.75A8.25 8.25 0 006 2.25a8.25 8.25 0 00-1.75.217V4.75a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75V4.533z" /><path d="M12.75 4.5a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H12.75zM12.75 7.5a.75.75 0 000 1.5h5.25a.75.75 0 000-1.5H12.75zM12 10.5a.75.75 0 01.75-.75h8.25a.75.75 0 010 1.5H12.75a.75.75 0 01-.75-.75zM12.75 13.5a.75.75 0 000 1.5h8.25a.75.75 0 000-1.5H12.75zM12 16.5a.75.75 0 01.75-.75h5.25a.75.75 0 010 1.5H12.75a.75.75 0 01-.75-.75z" /></svg>`,
+                events: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zM6 7.5a1.5 1.5 0 00-1.5 1.5v11.25a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V9a1.5 1.5 0 00-1.5-1.5H6z" clip-rule="evenodd" /></svg>`,
+                ai: `<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M9.315 7.584C10.12 6.85 11.046 6.334 12 6.065c.954-.269 1.9-.415 2.845-.415a11.248 11.248 0 011.59.133.75.75 0 01.32.992l-1.32 2.64a.75.75 0 01-1.228.214l-1.32-1.32a.75.75 0 00-1.06 0l-3.48 3.48a.75.75 0 01-1.06-1.06l3.48-3.48zm2.685 3.48a.75.75 0 00-1.06-1.06l-3.48 3.48a.75.75 0 001.06 1.06l3.48-3.48zm-2.122 5.122a.75.75 0 01.214-1.228l2.64-1.32a.75.75 0 01.992.32c.044.082.08.168.109.256.29.88.435 1.795.435 2.715 0 .954-.146 1.9-.415 2.845-.27.954-.686 1.88-1.228 2.64a.75.75 0 01-1.228-.214l1.32-2.64a.75.75 0 00-.214-1.228l-1.32-1.32a.75.75 0 010-1.06l1.06-1.06z" clip-rule="evenodd" /><path d="M4.93 5.636a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.899-1.06a.75.75 0 011.06 0l1.06 1.06a.75.75 0 11-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM18.364 14.83a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0z" /></svg>`,
+                linkedin: `<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 118.25 6.5 1.75 1.75 0 016.5 8.25zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0013 14.19a.66.66 0 000 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 012.7-1.4c1.55 0 3.36.86 3.36 3.66z"></path></svg>`,
+                upvote: `<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.75 3.375a.75.75 0 00-1.5 0v11.25l-3.3-3.3a.75.75 0 00-1.06 1.06l4.5 4.5a.75.75 0 001.06 0l4.5-4.5a.75.75 0 00-1.06-1.06l-3.3 3.3V3.375z" /><path d="M3 15a.75.75 0 00.75.75h16.5a.75.75 0 000-1.5H3.75A.75.75 0 003 15z" /></svg>`,
+                reply: `<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.15l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.15 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97z" clip-rule="evenodd" /></svg>`,
+            };
+            
+            // --- TEMPLATES ---
+            // These functions generate HTML strings for different parts of the UI.
+            
+            const createCard = (user) => `
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:border-indigo-200">
+                    <div class="flex items-center space-x-4 mb-4">
+                        <img src="${user.profilePic}" alt="${user.name}" class="w-16 h-16 rounded-full shadow-md" onerror="this.src='https://placehold.co/100x100/E2E8F0/475569?text=??'">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">${user.name}</h3>
+                            <p class="text-sm text-indigo-600 font-semibold">${user.type} - Batch of ${user.batch}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-sm text-slate-600">
+                        <p><span class="font-semibold text-slate-700">Specialization:</span> ${user.specialization}</p>
+                        ${user.type === 'Alumni' ? `<p><span class="font-semibold text-slate-700">Role:</span> ${user.title} at ${user.company}</p>` : ''}
+                        <p><span class="font-semibold text-slate-700">Location:</span> ${user.location}</p>
+                    </div>
+                    <div class="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                        ${user.isMentor ? `<button data-modal-title="Request Mentorship" data-modal-body="Send a mentorship request to ${user.name}." class="modal-trigger flex-1 bg-emerald-50 text-emerald-700 text-xs font-bold py-2 px-3 rounded-lg hover:bg-emerald-100 transition duration-300">Request Mentorship</button>` : ''}
+                        <a href="${user.linkedin}" target="_blank" rel="noopener noreferrer" class="flex-1 bg-sky-50 text-sky-700 text-xs font-bold py-2 px-3 rounded-lg hover:bg-sky-100 transition duration-300 flex items-center justify-center space-x-1.5">
+                            ${icons.linkedin} <span>LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            const pages = {
+                home: `
+                    <div id="home" class="content-section space-y-10">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-2">Welcome to the PIMR Hub</h2>
+                            <p class="text-slate-500">Your exclusive platform for connection, collaboration, and career growth.</p>
+                        </div>
+                         <!-- Quick Actions -->
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Quick Actions</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <button onclick="switchTab('directory')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 text-left hover:shadow-lg hover:border-indigo-200 transition-all">
+                                    <h4 class="font-bold text-lg text-indigo-700">Find a Mentor</h4>
+                                    <p class="text-slate-500 text-sm mt-1">Browse the directory for alumni mentors.</p>
+                                </button>
+                                <button onclick="switchTab('careers')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 text-left hover:shadow-lg hover:border-indigo-200 transition-all">
+                                    <h4 class="font-bold text-lg text-indigo-700">Post an Opportunity</h4>
+                                    <p class="text-slate-500 text-sm mt-1">Share a job or internship with the community.</p>
+                                </button>
+                                <button onclick="switchTab('discussions')" class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 text-left hover:shadow-lg hover:border-indigo-200 transition-all">
+                                    <h4 class="font-bold text-lg text-indigo-700">Ask the Community</h4>
+                                    <p class="text-slate-500 text-sm mt-1">Post a question on the discussion wall.</p>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Alumni Spotlight -->
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Alumni Spotlight</h3>
+                            <div class="bg-gradient-to-tr from-indigo-50 via-white to-purple-50 p-6 rounded-xl shadow-md border border-slate-200 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                                <img src="${mockData.users[4].profilePic}" alt="${mockData.users[4].name}" class="w-24 h-24 rounded-full border-4 border-white shadow-lg">
+                                <div class="text-center sm:text-left">
+                                    <h4 class="text-xl font-bold text-indigo-800">${mockData.users[4].name}</h4>
+                                    <p class="text-slate-600">${mockData.users[4].title} at ${mockData.users[4].company}</p>
+                                    <p class="text-sm text-slate-500 mt-1">Batch of ${mockData.users[4].batch}</p>
+                                    <p class="mt-2 text-slate-700 italic">"Leveraging my PIMR network was pivotal in launching my startup. Connect, collaborate, and never stop learning."</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Engagement & Fun -->
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-4">Engagement Hub</h3>
+                            <div class="max-w-md mx-auto">
+                                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                                    <h4 class="font-semibold text-lg mb-2 text-slate-800">Discussion Challenge</h4>
+                                    <p class="text-slate-600 mb-4">This week: "What's one book that changed your career perspective?"</p>
+                                    <button class="w-full bg-purple-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-600 transition duration-300">Join Discussion</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                directory: `
+                    <div id="directory" class="content-section space-y-6">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Alumni & Student Directory</h2>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <input id="search-term" type="text" placeholder="Search by name..." class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <select id="filter-specialization" class="w-full p-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">All Specializations</option>
+                                        ${[...new Set(mockData.users.map(u => u.specialization))].map(s => s !== 'N/A' ? `<option value="${s}">${s}</option>` : '').join('')}
+                                    </select>
+                                    <select id="filter-batch" class="w-full p-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">All Batches</option>
+                                        ${[...new Set(mockData.users.map(u => u.batch))].sort((a,b) => b-a).map(b => `<option value="${b}">${b}</option>`).join('')}
+                                    </select>
+                                    <select id="filter-location" class="w-full p-2 border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">All Locations</option>
+                                        ${[...new Set(mockData.users.map(u => u.location))].map(l => `<option value="${l}">${l}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="directory-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${mockData.users.map(createCard).join('')}
+                        </div>
+                    </div>
+                `,
+                community: `
+                    <div id="community" class="content-section space-y-8">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Community Groups & Clubs</h2>
+                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${mockData.groups.map(group => `
+                                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                                        <h3 class="text-lg font-bold text-slate-800">${group.name}</h3>
+                                        <p class="text-sm text-slate-500 mb-2">${group.type} Group</p>
+                                        <p class="text-slate-600 mb-4 font-medium">${group.members} members</p>
+                                        <button class="w-full bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300">View Group</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `,
+                discussions: `
+                    <div id="discussions" class="content-section space-y-8">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Problem-Solving & Q&A Wall</h2>
+                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                                <textarea class="w-full p-3 border border-slate-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" rows="3" placeholder="Share a problem or ask a question..."></textarea>
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center">
+                                        <input type="checkbox" id="anonymous" class="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+                                        <label for="anonymous" class="ml-2 text-sm text-slate-600">Post Anonymously</label>
+                                    </div>
+                                    <button class="bg-indigo-600 text-white font-bold py-2 px-5 rounded-lg hover:bg-indigo-700 transition duration-300">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            ${mockData.discussions.map(d => `
+                                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                                    <div class="flex items-center space-x-3 mb-3">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center ${d.anonymous ? 'bg-slate-200' : 'bg-purple-100'}">
+                                            <span class="font-bold text-purple-700">${d.anonymous ? '?' : d.author.split(' ').map(n => n[0]).join('')}</span>
+                                        </div>
+                                        <span class="font-semibold text-slate-800">${d.anonymous ? 'Anonymous' : d.author}</span>
+                                    </div>
+                                    <p class="text-slate-700 mb-4">${d.question}</p>
+                                    <div class="flex items-center text-sm text-slate-500 space-x-6">
+                                        <button class="flex items-center space-x-1.5 hover:text-indigo-600 font-semibold transition-colors">
+                                            ${icons.upvote} <span>${d.upvotes} Upvotes</span>
+                                        </button>
+                                        <button class="flex items-center space-x-1.5 hover:text-indigo-600 font-semibold transition-colors">
+                                            ${icons.reply} <span>${d.replies} Replies</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `,
+                careers: `
+                    <div id="careers" class="content-section space-y-8">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Job & Internship Board</h2>
+                            <div class="space-y-4">
+                                ${mockData.jobs.map(job => `
+                                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between md:items-center">
+                                        <div>
+                                            <h3 class="text-lg font-bold text-slate-800">${job.title}</h3>
+                                            <p class="text-slate-600">${job.company} - ${job.location}</p>
+                                            <span class="mt-1 text-xs font-semibold inline-block py-1 px-2.5 uppercase rounded-full ${job.type === 'Internship' ? 'text-emerald-700 bg-emerald-100' : 'text-sky-700 bg-sky-100'}">
+                                                ${job.type}
+                                            </span>
+                                        </div>
+                                        <div class="mt-4 md:mt-0 flex flex-col md:flex-row md:space-x-2 space-y-2 md:space-y-0">
+                                            <button data-modal-title="Request Referral" data-modal-body="Send a referral request to ${job.postedBy} for the ${job.title} role." class="modal-trigger bg-indigo-100 text-indigo-700 font-bold py-2 px-4 rounded-lg hover:bg-indigo-200 transition duration-300 text-sm">Request Referral</button>
+                                            <button class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 text-sm">View & Apply</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 mb-4">Project Collaboration Hub</h2>
+                            <div class="space-y-4">
+                                ${mockData.projects.map(p => `
+                                    <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                                        <p class="text-slate-800 mb-2">${p.title}</p>
+                                        <div class="flex justify-between items-center">
+                                            <p class="text-sm text-slate-500">Posted by: ${p.postedBy}</p>
+                                            <button class="bg-emerald-500 text-white font-bold py-1 px-3 rounded-lg hover:bg-emerald-600 transition duration-300 text-sm">Connect</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `,
+                events: `
+                    <div id="events" class="content-section">
+                        <h2 class="text-3xl font-extrabold text-slate-800 mb-4">Events Calendar</h2>
+                        <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                            <div class="space-y-2">
+                                ${mockData.events.map(event => `
+                                    <div class="flex items-center space-x-4 p-4 border-b border-slate-100 last:border-b-0">
+                                        <div class="text-center w-16 flex-shrink-0">
+                                            <p class="text-sm text-red-600 font-bold uppercase">${new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}</p>
+                                            <p class="text-2xl font-extrabold text-slate-800">${new Date(event.date).getDate()}</p>
+                                        </div>
+                                        <div class="flex-grow">
+                                            <h3 class="font-bold text-slate-800">${event.title}</h3>
+                                            <p class="text-sm text-slate-500">${event.type}</p>
+                                        </div>
+                                        <button class="bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition text-sm">Details</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `,
+                ai: `
+                    <div id="ai" class="content-section space-y-8">
+                         <div>
+                            <h2 class="text-3xl font-extrabold text-slate-800 mb-2">AI Career Co-pilot</h2>
+                            <p class="text-slate-500">Your personal assistant for career preparation.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                             <div id="ai-response" class="hidden prose prose-sm max-w-none bg-indigo-50 p-4 rounded-lg mb-4 border border-indigo-200 text-indigo-800">
+                                <!-- AI response will be injected here -->
+                             </div>
+                             <textarea id="ai-prompt" class="w-full p-3 border border-slate-300 rounded-lg mb-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" rows="4" placeholder="e.g., Help me write a professional summary for my resume..."></textarea>
+                             <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="ai-suggestion-btn text-xs font-semibold bg-slate-100 text-slate-600 py-1 px-3 rounded-full hover:bg-slate-200">Resume Summary</button>
+                                    <button class="ai-suggestion-btn text-xs font-semibold bg-slate-100 text-slate-600 py-1 px-3 rounded-full hover:bg-slate-200">Interview Questions</button>
+                                    <button class="ai-suggestion-btn text-xs font-semibold bg-slate-100 text-slate-600 py-1 px-3 rounded-full hover:bg-slate-200">Email to Recruiter</button>
+                                </div>
+                                <button id="ai-generate-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 w-full sm:w-auto">Generate</button>
+                             </div>
+                        </div>
+                    </div>
+                `,
+            };
+
+            const navLinksContainer = document.getElementById('nav-links');
+            const mainContainer = document.querySelector('main');
+            let activeTab = 'home';
+
+            const navItems = [
+                { id: 'home', label: 'Home', icon: icons.home },
+                { id: 'directory', label: 'Directory', icon: icons.directory },
+                { id: 'community', label: 'Community', icon: icons.community },
+                { id: 'discussions', label: 'Discussions', icon: icons.discussions },
+                { id: 'careers', label: 'Careers', icon: icons.careers },
+                { id: 'events', label: 'Events', icon: icons.events },
+                { id: 'ai', label: 'AI Co-pilot', icon: icons.ai },
+            ];
+            
+            // --- INITIALIZATION ---
+            
+            function init() {
+                // Create nav links
+                navLinksContainer.innerHTML = navItems.map(item => `
+                    <button data-tab="${item.id}" class="nav-link flex items-center space-x-2 px-3 py-2 rounded-full transition-colors duration-200 text-sm font-semibold ${item.id === activeTab ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:bg-slate-200'}">
+                        ${item.icon}
+                        <span class="hidden md:inline">${item.label}</span>
+                    </button>
+                `).join('');
+
+                // Inject page content
+                mainContainer.innerHTML = Object.values(pages).join('');
+                
+                // Set initial active tab
+                document.getElementById(activeTab).classList.add('active');
+
+                // Add event listeners
+                addEventListeners();
+                
+                // Initial render of directory
+                renderDirectory();
             }
-        });
-        
-        subscriptionList.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('delete-btn')) {
-                const subId = e.target.dataset.id;
-                if (confirm('Are you sure you want to delete this subscription?')) {
-                    try {
-                        const subDocRef = doc(db, `users/${userId}/subscriptions`, subId);
-                        await deleteDoc(subDocRef);
-                    } catch (error) {
-                        console.error("Error deleting document: ", error);
-                        alert("Failed to delete subscription.");
+
+            // --- EVENT LISTENERS ---
+            
+            function addEventListeners() {
+                // Navigation
+                navLinksContainer.addEventListener('click', (e) => {
+                    const navButton = e.target.closest('.nav-link');
+                    if (navButton) {
+                        switchTab(navButton.dataset.tab);
                     }
+                });
+
+                // Directory filters
+                document.getElementById('search-term').addEventListener('input', renderDirectory);
+                document.getElementById('filter-specialization').addEventListener('change', renderDirectory);
+                document.getElementById('filter-batch').addEventListener('change', renderDirectory);
+                document.getElementById('filter-location').addEventListener('change', renderDirectory);
+
+                // AI Co-pilot
+                document.getElementById('ai-generate-btn').addEventListener('click', generateAiResponse);
+                document.querySelectorAll('.ai-suggestion-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const promptText = e.target.textContent;
+                        document.getElementById('ai-prompt').value = `Generate content for: ${promptText}`;
+                        generateAiResponse();
+                    });
+                });
+
+                // Modal
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.closest('.modal-trigger')) {
+                        const trigger = e.target.closest('.modal-trigger');
+                        openModal(trigger.dataset.modalTitle, trigger.dataset.modalBody);
+                    }
+                });
+                document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+                document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+                document.getElementById('modal-confirm-btn').addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closeModal();
+                });
+            }
+
+            // --- FUNCTIONS ---
+            
+            window.switchTab = function(tabId) {
+                if (tabId === activeTab) return;
+                activeTab = tabId;
+
+                // Update nav link styles
+                document.querySelectorAll('.nav-link').forEach(btn => {
+                    btn.classList.toggle('bg-white', btn.dataset.tab === activeTab);
+                    btn.classList.toggle('text-indigo-700', btn.dataset.tab === activeTab);
+                    btn.classList.toggle('shadow-sm', btn.dataset.tab === activeTab);
+                    btn.classList.toggle('text-slate-600', btn.dataset.tab !== activeTab);
+                    btn.classList.toggle('hover:bg-slate-200', btn.dataset.tab !== activeTab);
+                });
+
+                // Update content visibility
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.toggle('active', section.id === activeTab);
+                });
+            }
+
+            function renderDirectory() {
+                const searchTerm = document.getElementById('search-term').value.toLowerCase();
+                const specialization = document.getElementById('filter-specialization').value;
+                const batch = document.getElementById('filter-batch').value;
+                const location = document.getElementById('filter-location').value;
+
+                const filteredUsers = mockData.users.filter(user => 
+                    user.name.toLowerCase().includes(searchTerm) &&
+                    (specialization === '' || user.specialization === specialization) &&
+                    (batch === '' || user.batch.toString() === batch) &&
+                    (location === '' || user.location === location)
+                );
+
+                const grid = document.getElementById('directory-grid');
+                if (filteredUsers.length > 0) {
+                    grid.innerHTML = filteredUsers.map(createCard).join('');
+                } else {
+                    grid.innerHTML = `<div class="md:col-span-2 lg:col-span-3 text-center py-12 bg-white rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-semibold text-slate-700">No members found</h3>
+                        <p class="text-slate-500 mt-2">Try adjusting your search filters.</p>
+                    </div>`;
                 }
             }
+
+            function generateAiResponse() {
+                const prompt = document.getElementById('ai-prompt').value.toLowerCase();
+                const responseContainer = document.getElementById('ai-response');
+                let responseHtml = '';
+
+                if (prompt.includes('resume') || prompt.includes('summary')) {
+                    responseHtml = `
+                        <h4>Resume Summary Template:</h4>
+                        <p>Here is a template to get you started. Fill in the brackets with your details.</p>
+                        <p class="mt-2"><em>"Results-driven and ambitious [Your Specialization] student with a strong foundation in [Skill 1] and [Skill 2]. Proven ability to [Action Verb + Result] in academic projects. Seeking to leverage my analytical skills and passion for [Industry] to contribute to the [Role Type, e.g., Marketing] team at a dynamic organization."</em></p>
+                    `;
+                } else if (prompt.includes('interview') || prompt.includes('questions')) {
+                     responseHtml = `
+                        <h4>Common Interview Questions (Marketing):</h4>
+                        <ul>
+                            <li>Tell me about yourself and why you're interested in marketing.</li>
+                            <li>Describe a marketing campaign you admire and explain why.</li>
+                            <li>How would you approach marketing a new product with a limited budget?</li>
+                            <li>What are the 4 Ps of marketing? How are they relevant today?</li>
+                            <li>Where do you see yourself in 5 years?</li>
+                        </ul>
+                    `;
+                } else if (prompt.includes('email') || prompt.includes('recruiter')) {
+                    responseHtml = `
+                        <h4>Template: Email to a Recruiter</h4>
+                        <p><strong>Subject:</strong> Interested in [Role Name] at [Company Name] – PIMR Student</p>
+                        <p class="mt-2">Dear [Recruiter Name],</p>
+                        <p>My name is [Your Name], and I am a first-year [Your Specialization] student at Prestige Institute of Management & Research. I discovered the [Role Name] opportunity on [Platform, e.g., LinkedIn] and was immediately drawn to [Company Name]'s innovative work in [Industry].</p>
+                        <p>My coursework in [Relevant Course] and experience with [Relevant Skill] align well with the requirements of this role. I have attached my resume for your consideration and would welcome the opportunity to discuss how I can contribute to your team.</p>
+                        <p>Thank you for your time and consideration.</p>
+                        <p>Sincerely,<br>[Your Name]</p>
+                    `;
+                } else {
+                    responseHtml = `<p>I can help with career-related tasks. Try one of the suggestions, like "Help me write a resume summary" or "Generate interview questions for a finance role."</p>`;
+                }
+
+                responseContainer.innerHTML = responseHtml;
+                responseContainer.classList.remove('hidden');
+            }
+
+            function openModal(title, body) {
+                document.getElementById('modal-title').textContent = title;
+                document.getElementById('modal-body').innerHTML = `<p>${body}</p>`;
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 10);
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modal-content');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
+
+            // --- START THE APP ---
+            init();
         });
-
-
-        // --- MODAL CONTROLS ---
-        const openModal = () => {
-            subscriptionForm.reset();
-            document.getElementById('subscription-id').value = '';
-            subscriptionModal.classList.remove('hidden');
-        };
-
-        const closeModal = () => {
-            subscriptionModal.classList.add('hidden');
-        };
-
-        addSubBtn.addEventListener('click', openModal);
-        cancelModalBtn.addEventListener('click', closeModal);
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeModal();
-        });
-
     </script>
+
 </body>
 </html>
